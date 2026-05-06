@@ -89,11 +89,11 @@ python -m multi_agent_research_lab.cli multi-agent --query "What is GraphRAG?"
 ```
 
 ### 5. Chạy Benchmark & So sánh
-Lệnh này sẽ chạy cả Baseline và Multi-Agent để so sánh hiệu suất và tạo báo cáo:
+Lệnh này sẽ chạy cả Baseline và Multi-Agent để so sánh hiệu suất và tạo báo cáo tự động (song ngữ):
 ```powershell
 python -m multi_agent_research_lab.cli benchmark --query "What is GraphRAG?"
 ```
-Báo cáo sẽ được lưu tại `reports/benchmark_report.md`.
+Báo cáo sẽ được lưu tại `reports/benchmark_report.md` và bằng chứng thực thi tại `reports/benchmark_report.json`.
 
 ## Các lệnh hữu ích trên Windows
 
@@ -103,7 +103,15 @@ Báo cáo sẽ được lưu tại `reports/benchmark_report.md`.
   ```
 - **Chạy Tests:**
   ```powershell
-  pytest
+  $env:PYTHONPATH="src"; venv\Scripts\pytest.exe
+  ```
+- **Kiểm tra Lint (Sửa lỗi trình bày):**
+  ```powershell
+  $env:PYTHONPATH="src"; venv\Scripts\ruff.exe check src tests --fix
+  ```
+- **Kiểm tra Typecheck (Kiểm tra kiểu):**
+  ```powershell
+  $env:PYTHONPATH="src"; venv\Scripts\mypy.exe src
   ```
 - **Xử lý lỗi hiển thị (Unicode):** Nếu terminal hiển thị lỗi emoji hoặc ký tự lạ, hãy chạy lệnh này trước:
   ```powershell
