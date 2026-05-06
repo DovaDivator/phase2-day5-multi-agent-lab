@@ -21,9 +21,19 @@ class Settings(BaseSettings):
     openai_model: str = Field(default="gpt-4o-mini", validation_alias="OPENAI_MODEL")
 
     langsmith_api_key: str | None = Field(default=None, validation_alias="LANGSMITH_API_KEY")
-    langsmith_project: str = Field(default="multi-agent-research-lab", validation_alias="LANGSMITH_PROJECT")
+    langsmith_project: str = Field(
+        default="multi-agent-research-lab", 
+        validation_alias="LANGSMITH_PROJECT"
+    )
 
     tavily_api_key: str | None = Field(default=None, validation_alias="TAVILY_API_KEY")
+
+    langfuse_public_key: str | None = Field(default=None, validation_alias="LANGFUSE_PUBLIC_KEY")
+    langfuse_secret_key: str | None = Field(default=None, validation_alias="LANGFUSE_SECRET_KEY")
+    langfuse_base_url: str = Field(
+        default="https://cloud.langfuse.com", 
+        validation_alias="LANGFUSE_BASE_URL"
+    )
 
     max_iterations: int = Field(default=6, ge=1, le=20, validation_alias="MAX_ITERATIONS")
     timeout_seconds: int = Field(default=60, ge=5, le=600, validation_alias="TIMEOUT_SECONDS")

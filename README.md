@@ -13,6 +13,7 @@ Sau 2 giờ lab, học viên cần có thể:
 3. Thêm guardrail tối thiểu: max iterations, timeout, retry/fallback, validation.
 4. Trace được luồng chạy và giải thích agent nào làm gì.
 5. Benchmark single-agent vs multi-agent theo quality, latency, cost.
+(Hỗ trợ Python >= 3.10)
 
 ## Architecture mục tiêu
 
@@ -52,98 +53,69 @@ Trace + Benchmark Report
 └── Makefile                 # Common commands
 ```
 
-## Quickstart
+## Quickstart (Windows/PowerShell)
 
-### 1. Tạo môi trường
+### 1. Tạo môi trường ảo
+Mở PowerShell tại thư mục dự án:
+```powershell
+# Tạo venv
+python -m venv venv
+.\venv\Scripts\activate
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-pip install -e "[dev]"
-cp .env.example .env
+# Cập nhật pip (quan trọng để hỗ trợ pyproject.toml)
+python -m pip install --upgrade pip
+
+# Cài đặt thư viện
+pip install -r requirements.txt
+pip install -e .
+copy .env.example .env
 ```
+
+> [!TIP]
+> Nếu bạn gặp lỗi `ModuleNotFoundError: No module named 'multi_agent_research_lab'`, đó là do Python không tìm thấy thư mục `src`. Hãy đảm bảo bạn chạy lệnh thiết lập `PYTHONPATH` trước khi chạy app (xem bước 3).
 
 ### 2. Cấu hình API keys
+Mở file `.env` và điền `OPENAI_API_KEY`. Các key khác như `TAVILY_API_KEY` (tìm kiếm web) và `LANGSMITH_API_KEY` (theo dõi trace) là tùy chọn.
 
-Mở `.env` và điền key cần thiết.
-
-```bash
-OPENAI_API_KEY=...
-# optional
-LANGSMITH_API_KEY=...
-TAVILY_API_KEY=...
+### 3. Chạy Baseline (Single-Agent)
+```powershell
+$env:PYTHONPATH="src"; $env:PYTHONIOENCODING="utf-8"
+python -m multi_agent_research_lab.cli baseline --query "What is GraphRAG?"
 ```
 
-### 3. Chạy smoke test
-
-```bash
-make test
-python -m multi_agent_research_lab.cli --help
+### 4. Chạy Multi-Agent Workflow
+```powershell
+python -m multi_agent_research_lab.cli multi-agent --query "What is GraphRAG?"
 ```
 
-### 4. Chạy baseline skeleton
-
-```bash
-python -m multi_agent_research_lab.cli baseline \
-  --query "Research GraphRAG state-of-the-art and write a 500-word summary"
+### 5. Chạy Benchmark & So sánh
+Lệnh này sẽ chạy cả Baseline và Multi-Agent để so sánh hiệu suất và tạo báo cáo:
+```powershell
+python -m multi_agent_research_lab.cli benchmark --query "What is GraphRAG?"
 ```
+Báo cáo sẽ được lưu tại `reports/benchmark_report.md`.
 
-Lệnh này chỉ chạy khung baseline tối giản. Học viên cần tự triển khai logic LLM thực tế trong `src/multi_agent_research_lab/services/llm_client.py`.
+## Các lệnh hữu ích trên Windows
 
-### 5. Chạy multi-agent skeleton
-
-```bash
-python -m multi_agent_research_lab.cli multi-agent \
-  --query "Research GraphRAG state-of-the-art and write a 500-word summary"
-```
-
-Mặc định lệnh sẽ báo các `TODO` cần làm. Đây là chủ đích của starter repo.
-
-## Milestones trong 2 giờ lab
-
-| Thời lượng | Milestone | File gợi ý |
-|---:|---|---|
-| 0-15' | Setup, chạy baseline skeleton | `cli.py`, `services/llm_client.py` |
-| 15-45' | Build Supervisor / router | `agents/supervisor.py`, `graph/workflow.py` |
-| 45-75' | Thêm Researcher, Analyst, Writer | `agents/*.py`, `core/state.py` |
-| 75-95' | Trace + benchmark single vs multi | `observability/tracing.py`, `evaluation/benchmark.py` |
-| 95-115' | Peer review theo rubric | `docs/peer_review_rubric.md` |
-| 115-120' | Exit ticket | `docs/lab_guide.md` |
-
-## Quy ước production trong repo
-
-- Tách rõ `agents`, `services`, `core`, `graph`, `evaluation`, `observability`.
-- Không hard-code API key trong code.
-- Tất cả input/output chính dùng Pydantic schema.
-- Có type hints, linting, formatting, unit test tối thiểu.
-- Có logging/tracing hook ngay từ đầu.
-- Không để agent chạy vô hạn: dùng `max_iterations`, `timeout_seconds`.
-- Có benchmark report thay vì chỉ demo output đẹp.
-
-## TODO chính cho học viên
-
-Tìm trong code các marker:
-
-```bash
-grep -R "TODO(student)" -n src tests docs
-```
-
-Các phần học viên cần tự làm:
-
-1. Implement LLM client.
-2. Implement web/search client hoặc mock search source.
-3. Implement routing decision trong Supervisor.
-4. Implement từng worker agent.
-5. Build LangGraph workflow.
-6. Thêm tracing provider thật: LangSmith, Langfuse hoặc OpenTelemetry.
-7. Viết benchmark report.
+- **Tìm các phần cần làm (TODO):**
+  ```powershell
+  Get-ChildItem -Recurse src, tests, docs | Select-String "TODO(student)"
+  ```
+- **Chạy Tests:**
+  ```powershell
+  pytest
+  ```
+- **Xử lý lỗi hiển thị (Unicode):** Nếu terminal hiển thị lỗi emoji hoặc ký tự lạ, hãy chạy lệnh này trước:
+  ```powershell
+  $env:PYTHONIOENCODING="utf-8"
+  ```
 
 ## Deliverables
 
 Học viên nộp:
 
 1. GitHub repo cá nhân.
-2. Screenshot trace hoặc link trace.
+2. Screenshot trace hoặc link trace (LangSmith/Langfuse).
 3. `reports/benchmark_report.md` so sánh single vs multi-agent.
 4. Một đoạn giải thích failure mode và cách fix.
 
